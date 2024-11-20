@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('cookie-session');
-//const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
+//const formidable = require('express-formidable');
+
 const app = express();
-app.use(formidable());
 
 const methodOverride = require('method-override');
 const Userschema = require('./models/user');
@@ -11,43 +12,38 @@ const User = mongoose.model('User', Userschema);
 const NewsSchema = require('./models/news');
 const News = mongoose.model('News', NewsSchema);
 const { name } = require('ejs');
-const uri = ''
+const uri = 'mongodb+srv://admin:admin@cluster0.oz6fo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 
 const port = 8091;
-
-
-
+//app.use(formidable());
 
 mongoose.connect(uri);
-
-
-
-
-
 
 async function main() {
     await mongoose.connect(uri);
 
+
     const users = await User.find();
     const Added_users = users.map(user => ({
+
         name: user.name,
         password: user.password
     }));
     console.log(Added_users);
 }
 
-
-
 async function main() {
     await mongoose.connect(uri);
 
     const staticUsers = [
         { name: 'developer', password: 'developer' },
+
         { name: 'guest', password: 'guest' }
     ];
 
     const dynamicUsers = await User.find().select('name password');
     const Added_users = [...staticUsers, ...dynamicUsers.map(user => ({
+
         name: user.name,
         password: user.password
     }))];
@@ -62,6 +58,7 @@ async function seedDatabase() {
         { name: 'BenLee', password: 'guest' },
         { name: 'Admin', password: 'admin' }
     ];
+
     const defaultUsers1 = [
         { title: 'TEST1', imageUrl: 'TEST1_IMAGE', info: 'TEST1_INFO' },
         { title: 'TEST2', imageUrl: 'TEST2_IMAGE', info: 'TEST2_INFO' },
@@ -72,6 +69,7 @@ async function seedDatabase() {
     const count_news = await News.countDocuments();
 
     if (count_user === 0) {
+
         await User.insertMany(defaultUsers);
 
         console.log('Database seeded with default users');
@@ -79,12 +77,15 @@ async function seedDatabase() {
         console.log('Database already has users, skipping seeding');
     }
 
+
     if (count_news === 0) {
         await News.insertMany(defaultUsers1);
         console.log('Database seeded with default news data');
     } else {
+
         console.log('Database already has news, skipping seeding');
     }
+
 
 }
 
@@ -94,16 +95,15 @@ main().catch(err => console.error(err));
 async function connectDB() {
     try {
         await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
         console.log('Connected to MongoDB');
         await seedDatabase();
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
         process.exit(1);
+
     }
 }
-
-
-
 
 app.set('view engine', 'ejs');
 const SECRETKEY = 'I want to pass COMPS381F';
@@ -112,12 +112,13 @@ app.use(session({
     name: 'loginSession',
     keys: [SECRETKEY],
     resave: false,
+
     saveUninitialized: true,
     cookie: { secure: false }
 }));
 
-//app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static('public'));
 
@@ -126,6 +127,7 @@ app.use(express.static('public'));
 //Routing
 app.get('/', async (req, res) => {
     console.log(req.session);
+
     const searchQuery = req.query.search || '';
     const NewsItems = await News.find({
         title: { $regex: searchQuery, $options: 'i' }
@@ -139,14 +141,17 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/login', async (req, res) => {
+
     res.status(200).render('login');
 });
 
 app.post('/login', (req, res) => {
     const Added_users = req.app.locals.Added_users;
+
     if (!Added_users) {
         return res.status(500).send('No users found. Please create users first.');
     }
+
     const foundUser = Added_users.find(user =>
         user.name === req.body.name && user.password === req.body.password
     );
@@ -174,17 +179,17 @@ app.post('/register', async (req, res) => {
     const dynamicUsers = await User.find().select('name password');
     const staticUsers = [
         { name: 'developer', password: 'developer' },
+
         { name: 'guest', password: 'guest' }
     ];
+
     req.app.locals.Added_users = [...staticUsers, ...dynamicUsers.map(user => ({
         name: user.name,
         password: user.password
     }))];
     res.redirect('/');
+
 });
-
-
-
 
 // Create Form
 app.get('/NewsItems/add', (req, res) => {
@@ -214,27 +219,22 @@ app.put('/NewsItems/:id', async (req, res) => {
 
 // Delete
 app.delete('/NewsItems/:id', async (req, res) => {
+
     await News.findByIdAndDelete(req.params.id);
     res.redirect('/');
 });
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////                                                                                                                                                    ////
-////                                                                                                                                                   ////
-////                                              test api                                                                                            ////
-////                                                                                                                                                 ////
-////                                                                                                                                                ////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//curl -X POST -H "Content-Type: application/json" "localhost:8091/api/title/Test123/img/_IMAGE/info/Test123_INFO"
 app.post('/api/title/:title/img/:imageUrl/info/:info', async (req,res) => { 
     if (req.params.title) {
         console.log(req.body)
 		//try {
 			await mongoose.connect(uri);
 			console.log("Connected successfully to server");
+
             let doc = { title: req.params.title || req.fields.title,
-                        imageUrl: req.fields.imageUrl,
-                        info: req.fields.info};
+                        imageUrl: req.params.imageUrl,
+                        info: req.params.info};
             const NewDoc = new News(doc);
             await NewDoc.save();
             console.log(NewDoc);
@@ -245,8 +245,8 @@ app.post('/api/title/:title/img/:imageUrl/info/:info', async (req,res) => {
 });
 
 
-
 app.get('/logout', (req, res) => {
+
     req.session = null;
     res.redirect('/');
 });
