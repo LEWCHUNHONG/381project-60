@@ -244,6 +244,63 @@ app.post('/api/title/:title/img/:imageUrl/info/:info', async (req,res) => {
     }
 });
 
+//read
+//curl -X GET "http://localhost:8091/api/title/Test123"
+app.get('/api/title/:title', async (req, res) => {
+    try {
+        const doc = await News.findOne({ title: req.params.title });
+        if (doc) {
+            res.status(200).json(doc);
+        } else {
+            res.status(404).json({ "error": "Document not found" });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ "error": "Internal server error" });
+    }
+});
+//update
+//curl -XPUT -H "Content-type: application/json" -d '{"imageUrl": "http://example.com/new-image.jpg", "info": "Updated info"}' 'http://localhost:8091/api/title/TEST1'
+app.put('/api/title/:title', async (req, res) => {
+    try {
+    	console.log(req.params.title);
+	console.log(req.body.imageUrl+" "+req.body.info)
+        const updatedDoc = await News.findOneAndUpdate(
+            { title: req.params.title },
+            {
+                imageUrl: req.body.imageUrl,
+                info: req.body.info
+            },
+            { new: true } // returns the updated document
+        );
+
+        if (updatedDoc) {
+            res.status(200).json({ "Successfully updated": updatedDoc });
+        } else {
+            res.status(404).json({ "error": "Document not found" });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ "error": "Internal server error" });
+    }
+});
+
+//delete
+//curl -X DELETE "http://localhost:8091/api/title/TEST1"
+app.delete('/api/title/:title', async (req, res) => {
+    try {
+        const deletedDoc = await News.findOneAndDelete({ title: req.params.title });
+        if (deletedDoc) {
+            res.status(200).json({ "Successfully deleted": deletedDoc });
+        } else {
+            res.status(404).json({ "error": "Document not found" });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ "error": "Internal server error" });
+    }
+});
+
 
 app.get('/logout', (req, res) => {
 
