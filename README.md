@@ -56,3 +56,21 @@ To run this project locally, follow these steps:
 7. **CURD**:
    ```bash
    Search, Edit, Delete News
+
+8. **RESTful API**:
+  Create:
+   ```bash
+   curl -X POST -H "Content-Type: application/json" --data '{"title":"TEst new titles","","info":"ＴＨＩＳ　ＩＳ　ＴＥＳＴ！！！！"}' <ip:port>/api/news/
+
+  Read:
+   ```bash
+  curl -X GET "<ip:port>/api/title/A night of redemption for Carsley offers real hope for Tuchel"
+
+  Updata:
+   ```bash
+  curl -X PUT -H "Content-type: application/json" -d '{"imageUrl": "", "info": "Updated info"}' '<IP:PORT>/api/title/TEST1'
+
+
+  Delete:
+   ```bash
+  curl -X DELETE "<ip:port>/api/title/TEst new titles"
