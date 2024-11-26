@@ -61,7 +61,8 @@ To run this project locally, follow these steps:
 
    ```bash
    Create:
-   curl -X POST -H "Content-Type: application/json" --data '{"title":"TEst new titles45343","imageUrl":"","info":"ＴＨＩＳ　ＩＳ　ＴＥＳＴ！！！！"}' <IP:PORT>/api/news/<newsid>
+   curl -X POST -H "Content-Type: application/json" --data '{"title":"TEst news123","imageUrl":"","info":"ＴＨＩＳ　ＩＳ　ＴＥＳＴ！！！！"}' <IP:PORT>/api/news/
+
    
    Read:
    curl -X GET "http://<ip:port>/api/title/<title>"
